@@ -20,49 +20,52 @@ Expect to spend about 2-4 hours on this.
 
 ## Requirements
 
-It should be created credentials for github actions to be authenticate to to Azure subscription 
-az ad sp create-for-rbac --name "my-gh-terraform-sp" --role="Contributor"\ 
---scopes="/subscriptions subscription_id_that_you_used" --sdk-auth
+  ### It should be created credentials for github actions to be authenticate to to Azure subscription 
+  az ad sp create-for-rbac --name "my-gh-terraform-sp" --role="Contributor"\ 
+  --scopes="/subscriptions subscription_id_that_you_used" --sdk-auth
 
-AZURE_CLIENT_ID=$(az ad sp list --display-name "my-gh-terraform-sp" --query '[0].appId' -o tsv)
+  AZURE_CLIENT_ID=$(az ad sp list --display-name "my-gh-terraform-sp" --query '[0].appId' -o tsv)
 
-az ad app federated-credential create --id "$AZURE_CLIENT_ID"  \
-  --parameters '{
-    "name": "github-oidc-federation",
+  az ad app federated-credential create --id "$AZURE_CLIENT_ID"  \
+    --parameters '{
+      "name": "github-oidc-federation",
+      "issuer": "https://token.actions.githubusercontent.com",
+     "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master",
+      "audiences": ["api://AzureADTokenExchange"]
+    }'
+  {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications('e45a5fed-0af0-4fbc-9a84-73ceccdb2dac')/federatedIdentityCredentials/$entity",
+    "audiences": [
+      "api://AzureADTokenExchange"
+    ],
+    "description": null,
+    "id": "xxxxx-xxxx-xxxx-xxx-xxxxx",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
-{
-  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications('e45a5fed-0af0-4fbc-9a84-73ceccdb2dac')/federatedIdentityCredentials/$entity",
-  "audiences": [
-    "api://AzureADTokenExchange"
-  ],
-  "description": null,
-  "id": "xxxxx-xxxx-xxxx-xxx-xxxxx",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "name": "github-oidc-federation",
-  "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master"
-}
+    "name": "github-oidc-federation",
+    "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master" 
+  }
 
+  ### It is important to assign privleges for the managed identity to provisoning resources by using terraform
+    az role assignment create   --assignee "a8018bbb-56e8-430b-8d2d-85b508f2cfd7"   --role "Contributor" \  
+    --scope "/subscriptions/f599dbbd-b482-4de5-b3de-a62cf8de30f0"
 
-Create the following secrets with each own value by accesing in github repository Settings->Security->Actions->Repository secret
-1. First secrets 
-Name:ARM_CLIENT_ID
-Value: What you you get from "echo $AZURE_CLIENT_ID"
+  ### Create the following secrets with each own value by accesing in github repositor Settings->Security->Actions->Repository secret
+    1. First secrets 
+         Name:ARM_CLIENT_ID
+         Value: What you you get from "echo $AZURE_CLIENT_ID"
 
-2. Second secret
-Name:ARM_TENANT_ID
-Value: What you get from this command "az account show --query tenantId --output tsv"
+    2. Second secret
+       Name:ARM_TENANT_ID
+       Value: What you get from this command "az account show --query tenantId --output tsv"
     
-3. Third secret
-Name: ARM_SUBSCRIPTION_ID
-Value: What you get as an output from this command "az account show --query id --output tsv"
+    3. Third secret
+       Name: ARM_SUBSCRIPTION_ID
+      Value: What you get as an output from this command "az account show --query id --output tsv"
+
 
 ### 1. Reusable Module Creation
 
 **Task**: Create a Terraform module for provisioning an Azure VNET that can be reused across different setups.
-
 - **Purpose**: This should deploy a VNET and related networking resources, designed with flexibility and security in mind.
 - **Hints**:
   - Think about what configurations might need to change depending on where or how this is used.
@@ -262,6 +265,5 @@ guarantee to take exactly these actions if you run "terraform apply" now.
   - Bonus points if you build a GitHub pipeline and explain the release lifecycle.
 
 ---
-
 Good luck—we’re excited to see your work!
 
