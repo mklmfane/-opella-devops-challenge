@@ -50,11 +50,15 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Plan
+      run: terraform plan -var="workflow=dev"  
 
-      - name: Select/Create Workspace
-        run: terraform workspace select -or-create ${{ matrix.environment }}
+    - name: Select/Create Workspace
+      run: |
+        terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
+
+    #- name: Terraform Plan
+    #  run: terraform plan -var="workflow=${{ matrix.environment }}"
 
       - name: Terraform Plan
         run: terraform plan -var="workflow=${{ matrix.environment }}"
