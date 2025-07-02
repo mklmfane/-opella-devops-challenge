@@ -40,15 +40,15 @@ variable "workflow" {
   }
 }
 
-#variable "username" {
-#  description = "username provided for VM"
-#  type        = string
-#  default     = "devops"
-#}
+variable "username" {
+  description = "username provided for VM"
+  type        = string
+  default     = "devops"
+}
 
 
-#variable "ssh_public_key" {
-#  description = "ssh public key file"
-#  type        = string
-#  default     = ""
-#}
+variable "ssh_public_key" {
+  description = "ssh public key file"
+  type        = string
+  default     = ""
+}

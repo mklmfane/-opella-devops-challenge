@@ -13,6 +13,7 @@ subnets = [
 ]
 
 username = "devops-test"
+public_key = "ssh-rsa DDDDM3PzaC1yc0EAAAADAQABAAACAQDSMg sadsd@myhost.com"
 
 tags = {
   environment = "dev"
