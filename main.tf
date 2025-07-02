@@ -11,7 +11,13 @@ locals {
   }
 }
 
+# Try to fetch the existing resource group
+#data "azurerm_resource_group" "existing_rg" {
+#  name = local.resource_group_name
+#}
+
 resource "azurerm_resource_group" "rg" {
+  #count    = data.azurerm_resource_group.existing_rg.id != "" ? 0 : 1
   name     = local.resource_group_name
   location = var.location
 }
