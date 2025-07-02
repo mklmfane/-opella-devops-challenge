@@ -39,3 +39,10 @@ variable "workflow" {
     error_message = "Workflow must be one of: dev, test, prod."
   }
 }
+
+variable "name_prefix" {
+  description = "Prefix for VMs"
+  type = string
+  
+  default = "opella-test" 
+}

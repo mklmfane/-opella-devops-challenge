@@ -7,7 +7,7 @@ on:
       - master
 
 permissions:
-  id-token: write    # REQUIRED for OIDC
+  id-token: write    # REQUIRED forauthontication through OIDC
   contents: read
 
 jobs:

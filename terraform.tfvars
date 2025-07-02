@@ -14,5 +14,8 @@ subnets = [
 
 tags = {
   environment = "dev"
-  project     = "opella"
+  project     = "opella-test"
+  owner       = "devops"
 }
+
+name_prefix = "opella-test" 
