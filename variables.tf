@@ -50,5 +50,5 @@ variable "username" {
 variable "ssh_public_key" {
   description = "ssh public key file"
   type        = string
-  default     = ""
+  default     = "ssh-rsa DDDDM3PzaC1yc0EAAAAFDFSDFAQABAAACAQDSMg sadsd@myhost.com"
 }
