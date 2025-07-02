@@ -48,5 +48,6 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -var="workflow=${{ matrix.environment }}"
 
+
     #- name: Terraform Apply
     #  run: terraform apply -auto-approve -var="workflow=${{ matrix.environment }}"
