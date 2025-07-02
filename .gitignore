@@ -1,4 +1,4 @@
-.terraform/*.*
+.terraform/
 terraform.tfstate
 terraform.tfstate.*
 crash.log
@@ -7,4 +7,4 @@ crash.log
 *.tar.gz
 .terraform/terraform.tfstate
 .terraform/terraform.tfstate.*
-terraform.lock.hcl
+.terraform.lock.hcl
