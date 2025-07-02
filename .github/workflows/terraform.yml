@@ -1,29 +1,79 @@
 name: Terraform-azure-connection
 
 on:
-  workflow_dispatch:   # allows manual triggering
+  workflow_dispatch:
   push:
     branches:
       - master
 
 permissions:
-  id-token: write
+  id-token: write    # REQUIRED for OIDC
   contents: read
 
 jobs:
-  build:
+  setup-oidc:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Az CLI login'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Use classic SP with creds (only needed for initial OIDC setup)
+      - name: Azure CLI login using existing credentials
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 'Run az commands'
+      - name: Run OIDC SP + federated credential setup script
+        id: oidc-setup
+        run: |
+          GH_REPO="${{ secrets.GH_REPO }}"
+          AZ_SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          AZ_TENANT_ID="${{ secrets.AZURE_TENANT_ID }}"
+
+          echo "### Creating OIDC Service Principal"
+          az ad sp create-for-rbac --name "gh-oidc-sp" --skip-assignment || echo "SP may already exist"
+
+          AZURE_CLIENT_ID=$(az ad sp list --display-name "gh-oidc-sp" --query '[0].appId' -o tsv)
+
+          echo "### Ensuring Contributor Role Assignment"
+          az role assignment create \
+            --assignee "$AZURE_CLIENT_ID" \
+            --role "Contributor" \
+            --scope "/subscriptions/$AZ_SUBSCRIPTION_ID" || echo "Role may already exist"
+
+          echo "### Creating Federated Credential for OIDC"
+          az ad app federated-credential create --id $AZURE_CLIENT_ID \
+            --parameters '{
+              "name": "github-oidc-federation",
+              "issuer": "https://token.actions.githubusercontent.com",
+              "subject": "repo:'$GH_REPO':ref:refs/heads/master",
+              "description": "GitHub OIDC connection for Terraform",
+              "audiences": ["api://AzureADTokenExchange"]
+            }' || echo "Federated credential may already exist"
+
+          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_ENV
+          echo "AZURE_SUBSCRIPTION_ID=$AZ_SUBSCRIPTION_ID" >> $GITHUB_ENV
+          echo "AZURE_TENANT_ID=$AZ_TENANT_ID" >> $GITHUB_ENV
+
+  build:
+    needs: setup-oidc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login with OIDC
+        uses: azure/login@v1
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Show Azure context
         run: |
           az account show
           az group list
-      
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -32,20 +82,15 @@ jobs:
         environment: [dev, test, prod]
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Azure Login
+      - name: Azure Login with OIDC
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Export ARM environment variables
-        run: |
-          echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}" >> $GITHUB_ENV    
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
