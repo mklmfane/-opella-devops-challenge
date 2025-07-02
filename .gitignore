@@ -8,4 +8,6 @@ terraform.tfstate.*
 *.tar.gz
 .terraform/terraform.tfstate
 .terraform/terraform.tfstate.*
-.terraform.lock.hcl
+.terraform.lock.hcl.terraform/
+*.tfstate
+*.tfstate.backup
