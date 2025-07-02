@@ -61,7 +61,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = var.location
   size                = "Standard_B1s"
 
-  admin_username      = "devops"
+  admin_username      = var.username
   network_interface_ids = [azurerm_network_interface.nic.id]
   os_disk {
     caching              = "ReadWrite"
