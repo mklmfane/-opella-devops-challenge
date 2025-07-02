@@ -40,9 +40,15 @@ variable "workflow" {
   }
 }
 
-variable "name_prefix" {
-  description = "Prefix for VMs"
-  type = string
-  
-  default = "opella-test" 
-}
+#variable "username" {
+#  description = "username provided for VM"
+#  type        = string
+#  default     = "devops"
+#}
+
+
+#variable "ssh_public_key" {
+#  description = "ssh public key file"
+#  type        = string
+#  default     = ""
+#}

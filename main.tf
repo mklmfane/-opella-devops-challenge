@@ -11,7 +11,6 @@ locals {
   }
 }
 
-
 resource "azurerm_resource_group" "rg" {
   name     = local.resource_group_name
   location = var.location
@@ -28,7 +27,7 @@ module "vnet" {
 }
 
 resource "azurerm_network_interface" "nic" {
-  name                = "${var.name_prefix}-nic-${local.environment}-${var.location}"
+  name                = "nic-${local.environment}-${var.location}"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -50,29 +49,39 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "${var.name_prefix}-vm-${local.environment}-${var.location}"
+  name                = "vm-${local.environment}-${var.location}"
   resource_group_name = azurerm_resource_group.rg.name
 
   location            = var.location
   size                = "Standard_B1s"
+  
   admin_username      = "devops"
   network_interface_ids = [azurerm_network_interface.nic.id]
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
+
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "20_04-lts"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
+  }
+
+
+  admin_ssh_key {
+    #username   = "devops"
+    username  = var.username
+    #public_key = file("${path.module}/id_rsa.pub")
+    public_key = var.ssh_public_key
   }
 
   tags = local.tags
 }
 
 resource "azurerm_storage_account" "sa" {
-  name                     = "${var.name_prefix}-sa${replace(local.environment, "-", "")}${random_string.suffix.result}"
+  name                     = "sa${replace(local.environment, "-", "")}${random_string.suffix.result}"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = var.location
   account_tier             = "Standard"

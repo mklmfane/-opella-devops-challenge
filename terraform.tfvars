@@ -12,10 +12,10 @@ subnets = [
   }
 ]
 
+username = "devops-test"
+
 tags = {
   environment = "dev"
   project     = "opella-test"
   owner       = "devops"
 }
-
-name_prefix = "opella-test" 
