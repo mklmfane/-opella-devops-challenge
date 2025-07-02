@@ -60,7 +60,7 @@ jobs:
         run: terraform plan -var="workflow=${{ matrix.environment }}"
 
       - name: Terraform Apply
-        run: terraform apply -var="workflow=${{ matrix.environment }} -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }} --auto-approve"
+        run: terraform apply -var="workflow=${{ matrix.environment }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
 
       - name: Terraform Destroy
-        run: terraform destroy -var="workflow=${{ matrix.environment }} -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }} --auto-approve"
+        run: terraform destroy -var="workflow=${{ matrix.environment }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
