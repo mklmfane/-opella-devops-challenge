@@ -7,3 +7,4 @@ crash.log
 *.tar.gz
 .terraform/terraform.tfstate
 .terraform/terraform.tfstate.*
+terraform.lock.hcl
