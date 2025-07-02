@@ -24,13 +24,6 @@ jobs:
           az account show
           az group list
       
-      - name: Export ARM environment variables
-        run: |
-          echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}" >> $GITHUB_ENV    
-     
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -39,25 +32,29 @@ jobs:
         environment: [dev, test, prod]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Terraform Init
-      run: terraform init
+      - name: Export ARM environment variables
+        run: |
+          echo "ARM_CLIENT_ID=${{ secrets.ARM_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}" >> $GITHUB_ENV    
 
-    #- name: Select/Create Workspace
-    #  run: |
-    #    terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
-    - name: Select/Create Workspace
-      run: terraform workspace select -or-create ${{ matrix.environment }}
+      - name: Terraform Init
+        run: terraform init
 
+      - name: Select/Create Workspace
+        run: terraform workspace select -or-create ${{ matrix.environment }}
 
-    - name: Terraform Plan
-      run: terraform plan -var="workflow=${{ matrix.environment }}"
-
-    #- name: Terraform Apply
-    #  run: terraform apply -auto-approve -var="workflow=${{ matrix.environment }}"
+      - name: Terraform Plan
+        run: terraform plan -var="workflow=${{ matrix.environment }}"
