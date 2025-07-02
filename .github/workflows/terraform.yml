@@ -50,9 +50,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-    - name: Terraform Plan
-      run: terraform plan -var="workflow=dev"  
+      - name: Terraform Init
+        run: terraform init
 
+<<<<<<< HEAD
     - name: Select/Create Workspace
       run: |
         terraform workspace select ${{ matrix.environment }} || terraform workspace new ${{ matrix.environment }}
@@ -62,3 +63,10 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan -var="workflow=${{ matrix.environment }}"
+=======
+      - name: Select/Create Workspace
+        run: terraform workspace select -or-create ${{ matrix.environment }}
+
+      - name: Terraform Plan
+        run: terraform plan -var="workflow=${{ matrix.environment }}"
+>>>>>>> 1250327 (Update piepline workflow)
