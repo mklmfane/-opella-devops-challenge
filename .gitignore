@@ -5,3 +5,5 @@ crash.log
 *.tfplan
 *.zip
 *.tar.gz
+.terraform/terraform.tfstate
+.terraform/terraform.tfstate.*
