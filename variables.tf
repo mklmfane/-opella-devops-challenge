@@ -43,7 +43,7 @@ variable "workflow" {
 variable "username" {
   description = "username provided for VM"
   type        = string
-  default     = "devops"
+  default     = "devops-test"
 }
 
 

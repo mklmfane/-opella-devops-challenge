@@ -54,7 +54,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   location            = var.location
   size                = "Standard_B1s"
-  
+
   admin_username      = "devops"
   network_interface_ids = [azurerm_network_interface.nic.id]
   os_disk {
@@ -71,9 +71,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
 
   admin_ssh_key {
-    #username   = "devops"
     username  = var.username
-    #public_key = file("${path.module}/id_rsa.pub")
     public_key = var.ssh_public_key
   }
 
