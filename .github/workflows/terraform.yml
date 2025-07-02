@@ -13,11 +13,14 @@ permissions:
 jobs:
   setup-oidc:
     runs-on: ubuntu-latest
+    outputs:
+      AZURE_CLIENT_ID: ${{ steps.oidc-setup.outputs.AZURE_CLIENT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ steps.oidc-setup.outputs.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ steps.oidc-setup.outputs.AZURE_TENANT_ID }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Use classic SP with creds (only needed for initial OIDC setup)
       - name: Azure CLI login using existing credentials
         uses: azure/login@v1
         with:
@@ -49,11 +52,11 @@ jobs:
               "subject": "repo:'$GH_REPO':ref:refs/heads/master",
               "description": "GitHub OIDC connection for Terraform",
               "audiences": ["api://AzureADTokenExchange"]
-            }' || echo "Federated credential may already exist"
+          }' || echo "Federated credential may already exist"
 
-          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_ENV
-          echo "AZURE_SUBSCRIPTION_ID=$AZ_SUBSCRIPTION_ID" >> $GITHUB_ENV
-          echo "AZURE_TENANT_ID=$AZ_TENANT_ID" >> $GITHUB_ENV
+          echo "::set-output name=AZURE_CLIENT_ID::$AZURE_CLIENT_ID"
+          echo "::set-output name=AZURE_SUBSCRIPTION_ID::$AZ_SUBSCRIPTION_ID"
+          echo "::set-output name=AZURE_TENANT_ID::$AZ_TENANT_ID"
 
   build:
     needs: setup-oidc
