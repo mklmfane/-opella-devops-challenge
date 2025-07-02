@@ -28,7 +28,6 @@ variable "tags" {
   default     = {}
 }
 
-
 variable "workflow" {
   description = "Workflow environment: dev, test, or prod"
   type        = string
