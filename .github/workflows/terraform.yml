@@ -79,10 +79,10 @@ jobs:
           echo "✅ Terratag version:"
           terratag --version
           
-          echo "🏷️ Tagging Terraform files with Terratag..."
-          terratag \
-            --directory . \
-            --tags='{"environment_id":"${{ matrix.environment }}", "project":"multi-env-demo", "owner":"devops"}'
+          echo "🏷️ Check tagging of all the Terraform files with Terratag..."
+
+          terratag -dir . \
+            -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
 
       - name: Terraform Apply
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
