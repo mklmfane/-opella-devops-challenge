@@ -70,8 +70,15 @@ jobs:
           tar -xzf terratag_0.1.29_linux_amd64.tar.gz
           chmod +x terratag
           sudo mv terratag /usr/local/bin/
-          terratag --version 
-          terratag -dir=. -tags="environment_id=${{ matrix.environment }},project=multi-env-demo,owner=devops" 
+          
+          echo "🧪 Verifying terratag version..."
+          terratag --version
+
+          echo "🔍 Verifying Terraform version parsing works..."
+          terraform version
+
+          echo "🏷️ Applying Terratag tags..."
+          terratag -dir=. -tags="environment_id=${{ matrix.environment }},project=multi-env-demo,owner=devops"
 
 
       - name: Terraform Apply
