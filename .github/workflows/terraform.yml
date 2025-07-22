@@ -64,6 +64,16 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}"
 
+      - name: Inject Tags with Terratag
+        uses: env0/terratag-action@v0.7.2
+        with:
+          directory: .
+        env:
+          TERRATAG_TAGS: |
+            environment=${{ matrix.environment }}
+            owner=devops
+            project=multi-env-demo
+
       - name: Terraform Apply
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
 
