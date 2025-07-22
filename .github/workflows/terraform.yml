@@ -29,6 +29,14 @@ jobs:
           az account show
           az group list
 
+      - name: Install Terratag v0.1.29 to check tags
+        run: |
+          curl -LO https://github.com/env0/terratag/releases/download/v0.1.29/terratag_0.1.29_linux_amd64.tar.gz
+          tar -xzf terratag_0.1.29_linux_amd64.tar.gz
+          chmod +x terratag
+          sudo mv terratag /usr/local/bin/
+          terratag --version
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -64,16 +72,10 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}"
 
-      - name: Install Terratag v0.1.29 to check tags
+      - name: Check tags using terratag
         run: |
-          curl -LO https://github.com/env0/terratag/releases/download/v0.1.29/terratag_0.1.29_linux_amd64.tar.gz
-          tar -xzf terratag_0.1.29_linux_amd64.tar.gz
-          chmod +x terratag
-          sudo mv terratag /usr/local/bin/
-          terratag --version
-          terratag \
-            --directory . \
-            -tags='{"environment":"${{ matrix.environment }}","owner":"devops","project":"multi-env-demo"}'
+          terratag --directory . \
+            --tags="{\"environment\":\"${{ matrix.environment }}\",\"owner\":\"devops\",\"project\":\"multi-env-demo\"}"
 
       - name: Terraform Apply
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
