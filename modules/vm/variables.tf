@@ -55,11 +55,6 @@ variable "source_image_reference" {
   }
 }
 
-#variable "network_interface_id" {
-#  description = "ID of the network interface"
-#  type        = string
-#}
-
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

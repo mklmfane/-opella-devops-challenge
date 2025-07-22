@@ -22,7 +22,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   size                = var.size_vm
 
   admin_username      = var.username
-  #network_interface_ids = [var.network_interface_id]
+
   network_interface_ids = [azurerm_network_interface.nic.id]
 
   os_disk {
@@ -42,5 +42,5 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = var.ssh_public_key
   }
 
-  tags = var.tags
+  #tags = var.tags
 }

@@ -32,7 +32,7 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 
   min_tls_version          = "TLS1_2"  # ✅ Fix: secure TLS version
-  tags                     = local.tags
+  #tags                     = local.tags
 }
 
 module "vnet" {
@@ -42,7 +42,7 @@ module "vnet" {
   vnet_name           = local.vnet_name
   address_space       = var.address_space
   subnets             = var.subnets
-  tags                = local.tags
+  #tags                = local.tags
 }
 
 
@@ -62,6 +62,6 @@ module "vm" {
   subnet_id = module.vnet.subnet_ids["subnet-1"]
   environment = local.environment
 
-  tags                   = local.tags
+  #tags                   = local.tags
 }
 
