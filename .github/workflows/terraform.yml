@@ -64,22 +64,25 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}"
 
-      - name: Check tags using terratag
+      - name: Check tags using Terratag v0.7.2
         run: |
-          curl -LO https://github.com/env0/terratag/releases/download/v0.1.29/terratag_0.1.29_linux_amd64.tar.gz
-          tar -xzf terratag_0.1.29_linux_amd64.tar.gz
+          echo "📥 Downloading Terratag v0.7.2..."
+          curl -Lo terratag.tar.gz https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_Linux_x86_64.tar.gz
+          
+          echo "📦 Extracting Terratag..."
+          tar -xzf terratag.tar.gz
+          
+          echo "🔧 Installing Terratag..."
           chmod +x terratag
           sudo mv terratag /usr/local/bin/
           
-          echo "🧪 Verifying terratag version..."
+          echo "✅ Terratag version:"
           terratag --version
-
-          echo "🔍 Verifying Terraform version parsing works..."
-          terraform version
-
-          echo "🏷️ Applying Terratag tags..."
-          terratag -dir=. -tags="environment_id=${{ matrix.environment }},project=multi-env-demo,owner=devops"
-
+          
+          echo "🏷️ Tagging Terraform files with Terratag..."
+          terratag \
+            --directory . \
+            --tags='{"environment_id":"${{ matrix.environment }}", "project":"multi-env-demo", "owner":"devops"}'
 
       - name: Terraform Apply
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
