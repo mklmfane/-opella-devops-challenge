@@ -67,10 +67,10 @@ jobs:
       - name: Check tags using Terratag v0.7.2
         run: |
           echo "📥 Downloading Terratag v0.7.2..."
-          curl -Lo terratag.tar.gz https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_Linux_x86_64.tar.gz
+          curl -Lo terratag.tar.gz https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_linux_amd64.tar.gz
           
           echo "📦 Extracting Terratag..."
-          tar -xzf terratag.tar.gz
+          tar zxvf terratag.tar.gz
           
           echo "🔧 Installing Terratag..."
           chmod +x terratag
