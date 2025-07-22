@@ -1,3 +1,4 @@
+subscription_id = "f599dbbd-b482-4de5-b3de-a62cf8de30f0"
 vnet_name     = "demo-vnet-first"
 address_space = ["10.0.0.0/16"]
 
