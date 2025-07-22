@@ -1,269 +1,270 @@
-# Opella DevOps Technical Challenge: Provision Azure Infrastructure with Terraform
+# [<img src="ttlogo.png" width="300" alt="Terratag Logo">](https://terratag.io)
 
-⚠️ **It's perfectly fine to use AI to assist with this coding challenge. However, ensure you can explain and justify your decisions during the live interview. Let's make the most of our time together.** ⚠️
+[![ci](https://github.com/env0/terratag/workflows/ci/badge.svg)](https://github.com/env0/terratag/actions?query=workflow%3Aci+branch%3Amaster) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fenv0%2Fterratag.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fenv0%2Fterratag?ref=badge_small)
 
-## Objective
+> <sub>Terratag is brought to you with&nbsp;❤️&nbsp; by
+> [<img src="logo.svg" width="150">](https://env0.com)
+> Let your team manage their own environment in AWS, Azure and Google. <br/>
+> Governed by your policies and with complete visibility and cost management.
 
-Showcase your skills in provisioning Azure infrastructure using Terraform, emphasizing reusable, secure, and maintainable Infrastructure as Code (IaC). This challenge will assess your ability to structure code effectively, manage resources across environments, and apply industry-standard practices using Azure, Terraform, and GitHub.
+## What?
 
-## Deliverables
+Terratag is a CLI tool allowing for tags or labels to be applied across an entire set of OpenTofu/Terraform files. Terratag will apply tags or labels to any AWS, GCP and Azure resources.
 
-1. Build a reusable Terraform module to deploy an Azure Virtual Network (VNET).
-2. Use this module to create multiple environments in Azure (eg, Develoment and Production), adding a few additional resources of your choice (eg, Blob).
-3. Submit your work via one or many GitHub repositories, make them plublic and share the URL with us.
-   - Please share the terraform plan output. You can use the [Azure Free-tier](https://azure.microsoft.com/en-in/pricing/free-services/).
-4. Make sure your code is clean. Propose tools and processes to help you in this aspect.
+### Terratag in action
 
-Expect to spend about 2-4 hours on this.
+![](https://assets.website-files.com/5dc3f52851595b160ba99670/5f62090d2d532ca35e143133_terratag.gif)
 
----
+## Why?
 
-## Requirements
+Maintaining tags across your application is hard, especially when done manually. Terratag enables you to easily add tags to your existing IaC and benefit from some cross-resource tag applications you wish you had thought of when you had just started writing your OpenTofu/Terraform, saving you tons of time and making future updates easy. [Read more](https://d1.awsstatic.com/whitepapers/aws-tagging-best-practices.pdf) on why tagging is important.
 
-  ### It should be created credentials for github actions to be authenticate to to Azure subscription 
-  az ad sp create-for-rbac --name "my-gh-terraform-sp" --role="Contributor"\ 
-  --scopes="/subscriptions subscription_id_that_you_used" --sdk-auth
+## How?
 
-  AZURE_CLIENT_ID=$(az ad sp list --display-name "my-gh-terraform-sp" --query '[0].appId' -o tsv)
+### Prerequisites
 
-  az ad app federated-credential create --id "$AZURE_CLIENT_ID"  \
-    --parameters '{
-      "name": "github-oidc-federation",
-      "issuer": "https://token.actions.githubusercontent.com",
-     "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master",
-      "audiences": ["api://AzureADTokenExchange"]
-    }'
-  {
-    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#applications('e45a5fed-0af0-4fbc-9a84-73ceccdb2dac')/federatedIdentityCredentials/$entity",
-    "audiences": [
-      "api://AzureADTokenExchange"
-    ],
-    "description": null,
-    "id": "xxxxx-xxxx-xxxx-xxx-xxxxx",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "name": "github-oidc-federation",
-    "subject": "repo:mklmfane/-opella-devops-challenge:ref:refs/heads/master" 
-  }
+- OpenTofu 1.x or Terraform 0.12 through 1.x.
 
-  ### It is important to assign privleges for the managed identity to provisoning resources by using terraform
-    az role assignment create   --assignee "a8018bbb-56e8-430b-8d2d-85b508f2cfd7"   --role "Contributor" \  
-    --scope "/subscriptions/f599dbbd-b482-4de5-b3de-a62cf8de30f0"
+### Usage
 
-  ### Create the following secrets with each own value by accesing in github repositor Settings->Security->Actions->Repository secret
-    1. First secrets 
-         Name:ARM_CLIENT_ID
-         Value: What you you get from "echo $AZURE_CLIENT_ID"
+1. Install from homebrew:
 
-    2. Second secret
-       Name:ARM_TENANT_ID
-       Value: What you get from this command "az account show --query tenantId --output tsv"
-    
-    3. Third secret
-       Name: ARM_SUBSCRIPTION_ID
-      Value: What you get as an output from this command "az account show --query id --output tsv"
+   ```
+   brew install env0/terratag/terratag
+   ```
 
+   Or download the latest [release binary](https://github.com/env0/terratag/releases) .
 
-### 1. Reusable Module Creation
+1. Initialize Opentofu/Terraform modules to get provider schema and pull child modules:
 
-**Task**: Create a Terraform module for provisioning an Azure VNET that can be reused across different setups.
-- **Purpose**: This should deploy a VNET and related networking resources, designed with flexibility and security in mind.
-- **Hints**:
-  - Think about what configurations might need to change depending on where or how this is used.
-  - Consider optional features that could enhance network security.
-  - What outputs you would add and why?
-  - What information would someone need in order to use this module? Bonus points if you automate documentation! (indicate how)
-  - Super extra points if your module is tested
+   ```bash
+    tofu init
+   ```
 
-  The modules is provided in the folder modules/vnet.
-  I crated moduels inside folder structure modules/vnet.
+   ```bash
+    terraform init
+   ```
 
-  module "vnet" {
-    source              = "./modules/vnet"
-    resource_group_name = azurerm_resource_group.rg.name
-    location            = var.location
-    vnet_name           = local.vnet_name
-    address_space       = var.address_space
-    subnets             = var.subnets
-    tags                = var.tags
-  }
+1. Run Terratag
 
+   ```bash
+    terratag -dir=foo/bar -tags={\"environment_id\": \"prod\"}
+   ```
 
-### 2. Infrastructure Setup
+   or
 
-**Task**: Create a repository and a GitHub pipeline to deploy multiple environments in Azure using your VNET module, plus a couple of additional resources.
+   ```bash
+    terratag -dir=foo/bar -tags="environment_id=prod,some-tag=value"
+   ```
 
-- **Folder Structure**: Set up your code to handle a `dev` environment in one Azure region (e.g., `eastus`), with an eye toward scaling to other environments and regions later.
+### Example Output
 
-Instead of creating folders, I preferred creating terraform workflows in github actions
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [dev, test, prod]
+#### Before Terratag
 
-    - name: Select/Create Workspace
-      run: terraform workspace select -or-create ${{ matrix.environment }}
+```
+|- aws.tf
+|- gcp.tf
+```
 
-
-- **Hints**:
-  - Argument why would you use Resource Groups or Subscriptions for multiple environments.
-    I decided to use terraform workflows for each individual environment
-    
-    In your case, you run multi-environment deployment via GitHub Actions workflows, each deploying into its own workspace (dev, test, prod), with environment set via:
-
-hcl
-locals {
-  environment = var.workflow
+```hcl
+# aws.tf
+provider "aws" {
+  version = "~> 2.0"
+  region  = "us-east-1"
 }
 
-  - Keeps it flexible, avoids extra manual setup.
-    Resource Groups can be used in most of the cases for the environments such as development, testing, and staging.
-    It will be easier to have the resource groups in the same subscription becas it easy to assign RBAC role with particular permissions.
-    Using separated Subscriptions are useful for production for isolation issues, separated billing and apply separated policies 
+resource "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+  acl    = "private"
 
-  - Include a virtual machine and one other resources (your choice—think about what’s useful in a dev setup).
-  
-  - Name and label resources to make the environment and region clear.
-    This can be performed by using variable 
-    variable "tags" {
-      description = "Tags"
-      type        = map(string)
-      default     = {}  
-    }
-    
-    Tags are define in maintf as local variable
-    hcl
-    locals {
-     
-      tags = {
-        environment = local.environment
-        project     = "multi-env-demo"
-     }
-    }
+  tags {
+    Name        = "My bucket"
+  }
+}
+```
 
+```hcl
+#gcp.tf
+resource "google_storage_bucket" "static-site" {
+  name          = "image-store.com"
+  location      = "EU"
+  force_destroy = true
 
-    This is the default value defined in terrafrom.tfvars
-    tags = {
-      environment = "dev"
-      project     = "opella"
-    }
- 
+  bucket_policy_only = true
 
-  - Avoid repeating values—how can you make this flexible?
-    That is why I decided to use local variable
-    
-  hcl
-    locals {
-      environment = var.workflow
-  
-      resource_group_name = "${local.environment}-rg"
-      vnet_name           = "${local.environment}-vnet"
-      storage_account_name = "${substr(replace("${local.environment}storage${replace(uuid(), "-", "")}", "-", ""), 0, 24)}"
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "404.html"
+  }
+  cors {
+    origin          = ["http://image-store.com"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+  labels = {
+    "foo" = "bar"
+  }
+}
 
-      tags = {
-        environment = local.environment
-        project     = "multi-env-demo"
-      }
-    }  
+```
 
-  - How might you label resources for better tracking? How would you enforce this?
+#### After Terratag
 
-    You can tag resources consistently for:
+Running `terratag -tags={\"env0_environment_id\":\"dev\",\"env0_project_id\":\"clientA\"}` will output:
 
-    - environment
-    - project
-    - cost center
-    - owner
-    - securtity compliance for security audit like PCI DSS
-    
-    How to enforce?
-    There are two ways of enfocing tags for better tracking
-     - Use one of choice fora applying  Terraform policies like Open policy agent or Terrafrom Sentinel.
-     - Use Azure Policy to stop deployment in cae the tags are not applied
+```
+|- aws.terratag.tf
+|- gcp.terratag.tf
+|- aws.tf.bak
+|- gcp.tf.bak
+```
 
-  
-  - What outputs might be useful and why?
-    Terraform used the selected providers to generate the following execution
-    plan. Resource actions are indicated with the following symbols:
-    + create
+```hcl
+# aws.terratag.tf
+provider "aws" {
+  version = "~> 2.0"
+  region  = "us-east-1"
+}
 
-    Terraform will perform the following actions:
+resource "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+  acl    = "private"
 
-  # azurerm_resource_group.rg will be created
-  + resource "azurerm_resource_group" "rg" {
-      + id       = (known after apply)
-      + location = "westeurope"
-      + name     = "dev-rg"
-    }
+  tags = merge( map("Name", "My bucket" ), local.terratag_added_main)
+}
+locals {
+  terratag_added_main = {"env0_environment_id"="dev","env0_project_id"="clientA"}
+}
+```
 
-  # module.vnet.azurerm_subnet.subnet["subnet-1"] will be created
-  + resource "azurerm_subnet" "subnet" {
-      + address_prefixes                               = [
-          + "10.0.1.0/24",
-        ]
-      + default_outbound_access_enabled                = true
-      + enforce_private_link_endpoint_network_policies = (known after apply)
-      + enforce_private_link_service_network_policies  = (known after apply)
-      + id                                             = (known after apply)
-      + name                                           = "subnet-1"
-      + private_endpoint_network_policies              = (known after apply)
-      + private_endpoint_network_policies_enabled      = (known after apply)
-      + private_link_service_network_policies_enabled  = (known after apply)
-      + resource_group_name                            = "dev-rg"
-      + virtual_network_name                           = "dev-vnet"
-    }
+```hcl
+# gcp.terratag.tf
+resource "google_storage_bucket" "static-site" {
+  name          = "image-store.com"
+  location      = "EU"
+  force_destroy = true
 
-  # module.vnet.azurerm_subnet.subnet["subnet-2"] will be created
-  + resource "azurerm_subnet" "subnet" {
-      + address_prefixes                               = [
-          + "10.0.2.0/24",
-        ]
-      + default_outbound_access_enabled                = true
-      + enforce_private_link_endpoint_network_policies = (known after apply)
-      + enforce_private_link_service_network_policies  = (known after apply)
-      + id                                             = (known after apply)
-      + name                                           = "subnet-2"
-      + private_endpoint_network_policies              = (known after apply)
-      + private_endpoint_network_policies_enabled      = (known after apply)
-      + private_link_service_network_policies_enabled  = (known after apply)
-      + resource_group_name                            = "dev-rg"
-      + virtual_network_name                           = "dev-vnet"
-    }
+  bucket_policy_only = true
 
-  # module.vnet.azurerm_virtual_network.virtual_network_one will be created
-  + resource "azurerm_virtual_network" "virtual_network_one" {
-      + address_space       = [
-          + "10.0.0.0/16",
-        ]
-      + dns_servers         = (known after apply)
-      + guid                = (known after apply)
-      + id                  = (known after apply)
-      + location            = "westeurope"
-      + name                = "dev-vnet"
-      + resource_group_name = "dev-rg"
-      + subnet              = (known after apply)
-      + tags                = {
-          + "environment" = "dev"
-          + "project"     = "opella"
-        }
-    }
+  website {
+    main_page_suffix = "index.html"
+    not_found_page   = "404.html"
+  }
+  cors {
+    origin          = ["http://image-store.com"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
+  }
+  labels = merge( map("foo" , "bar"), local.terratag_added_main)
+}
+locals {
+  terratag_added_main = {"env0_environment_id"="dev","env0_project_id"="clientA"}
+}
+```
 
-Plan: 4 to add, 0 to change, 0 to destroy.
+### Optional CLI flags
 
-Changes to Outputs:
-  + subnet_ids = {
-      + subnet-1 = (known after apply)
-      + subnet-2 = (known after apply)
-    }
-  + vnet_id    = (known after apply)
+- `-dir=<path>` - defaults to `.`. Sets the opentofu/terraform folder to tag `.tf` files in
+- `-skipTerratagFiles=false` - Dont skip processing `*.terratag.tf` files (when running terratag a second time for the same directory)
+- `-rename=false` - Instead of replacing files named `<basename>.tf` with `<basename>.terratag.tf`, keep the original filename
+- `-filter=<regular expression>` - defaults to `.*`. Only apply tags to the resource types matched by the regular expression
+- `-type=<terraform, terragrunt, or terragrunt-run-all>` - defaults to `terraform` (and `opentofu`). If `terragrunt` is used, tags the files under `.terragrunt-cache` folder. Note: if Terragrunt does not create a `.terragrunt-cache` folder, use the default or omit.
+- `-verbose` - Turn on verbose logging
+- `-default-to-terraform` By default uses OpenTofu (if installed), if set will use Terraform even when Opentofu is installed
+- `--keep-existing-tags` - When set, existing tags will be preserved when merging tags (by default, new tags override existing ones)
 
-─────────────────────────────────────────────────────────────────────────────
+Setting options via enviroment variables is also supported. CLI flags have a precedence over envrionment variables.
 
-Note: You didn't use the -out option to save this plan, so Terraform can't
-guarantee to take exactly these actions if you run "terraform apply" now.
-  - Bonus points if you build a GitHub pipeline and explain the release lifecycle.
+```
+TERRATAG_TAGS
+TERRATAG_DIR
+TERRATAG_SKIPTERRATAGFILES
+TERRATAG_FILTER
+TERRATAG_SKIP
+TERRATAG_VERBOSE
+TERRATAG_RENAME
+TERRATAG_TYPE
+TERRATAG_DEFAULT_TO_TERRAFORM
+TERRATAG_KEEP_EXISTING_TAGS
+```
 
----
-Good luck—we’re excited to see your work!
+##### See more samples [here](https://github.com/env0/terratag/tree/master/test/fixture)
 
+## Notes
+
+- Resources already having the exact same tag as the one being appended will be overridden
+- Supported providers
+  - `aws`
+  - `google`
+  - `azurerm`
+  - `azurestack`
+  - `azapi`
+
+## Develop
+
+Issues and Pull Requests are very welcome!
+
+### Prerequisites
+
+- Go > 1.23
+
+### Build
+
+```bash
+git clone https://github.com/env0/terratag
+cd terratag
+go mod tidy
+go build ./cmd/terratag
+```
+
+### Test
+
+#### Structure
+
+The test cases are located under `test/tests`
+Each test case placed there should have the following directory structure:
+
+```
+my_test
+|+ input
+  ...            // any depth under /input
+     |- main.tf  // this is where we will run all terraform/terratag commands
+|- expected
+```
+
+- `input` is where you should place the terraform files of your test.
+  All commands will be executed wherever down the hierarchy where `main.tf` is located.
+  We do that to allow cases where complex nested submodule resolution may take place, and one would like to test how a directory higher up the hierarchy gets resolved.
+- `expected` is a directory in which all `.terratag.tf` files will be matched with the output directory
+
+Each terraform version has it's own config file containing the list of test suites to run.
+The config file is under `test/fixtures/terraform_xx/config.yaml` where `xx` is the terraform version.
+
+#### What's being tested?
+
+Each test will run:
+
+- `terraform init`
+- `terratag`
+- `terraform validate`
+
+And finally, will compare the results in `out` with the `expected` directory
+
+#### Running Tests
+
+Tests can only run on a specific Terraform version -
+
+```
+go test -run TestTerraformXX
+```
+
+We use [tfenv](https://github.com/tfutils/tfenv) to switch between versions. The exact versions used in the CI tests can be found under `test/tfenvconf`.
+
+## Release
+
+1. Create and push a tag locally, in semver format - `git tag v0.1.32 && git push origin --tags`
+2. Goto [Github Releases](https://github.com/env0/terratag/releases) and edit the draft created by Release Drafter Bot - it should contain the change log for the release (if not press on Auto-generate release notes). Make sure it's pointing at the tag you created in the previous step and publish the release.
+3. Binaries will be automatically generated by the Github action defined in `.github/workflows/release.yml`
+4. NPM will automatically pick up on the new version.

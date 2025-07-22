@@ -29,9 +29,10 @@ jobs:
           az account show
           az group list
 
-      - name: Install Terratag v0.7.2
+      - name: Install Terratag v0.1.29
         run: |
-          curl -Lo terratag https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_Linux_x86_64
+          curl -LO https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_linux_amd64.tar.gz
+          tar -xzf terratag_0.7.2_linux_amd64.tar.gz
           chmod +x terratag
           sudo mv terratag /usr/local/bin/
           terratag --version
