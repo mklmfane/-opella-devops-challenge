@@ -71,8 +71,8 @@ jobs:
           chmod +x terratag
           sudo mv terratag /usr/local/bin/
           terratag --version 
-          terratag --directory . \
-            --tags="{\"environment\":\"${{ matrix.environment }}\",\"owner\":\"devops\",\"project\":\"multi-env-demo\"}"
+          terratag -dir=. -tags="environment_id=${{ matrix.environment }},project=multi-env-demo,owner=devops" 
+
 
       - name: Terraform Apply
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
