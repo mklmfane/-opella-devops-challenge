@@ -7,11 +7,11 @@ resource "azurerm_network_interface" "nic" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = var.subnet_id
+    subnet_id                     = var.subnet_id 
     private_ip_address_allocation = "Dynamic"
   }
 
-  tags = merge(var.tags, local.terratag_added_main)
+  tags = var.tags
 }
 
 
@@ -21,7 +21,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = var.location
   size                = var.size_vm
 
-  admin_username = var.username
+  admin_username      = var.username
   #network_interface_ids = [var.network_interface_id]
   network_interface_ids = [azurerm_network_interface.nic.id]
 
@@ -42,10 +42,5 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = var.ssh_public_key
   }
 
-  tags = merge(var.tags, local.terratag_added_main)
+  tags = var.tags
 }
-
-locals {
-  terratag_added_main = {"environment"="dev","owner"="devops","project"="multi-env-demo"}
-}
-
