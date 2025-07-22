@@ -29,14 +29,6 @@ jobs:
           az account show
           az group list
 
-      - name: Install Terratag v0.1.29
-        run: |
-          curl -LO https://github.com/env0/terratag/releases/download/v0.7.2/terratag_0.7.2_linux_amd64.tar.gz
-          tar -xzf terratag_0.7.2_linux_amd64.tar.gz
-          chmod +x terratag
-          sudo mv terratag /usr/local/bin/
-          terratag --version
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -72,9 +64,14 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}"
 
-      - name: Check tags 
+      - name: Install Terratag v0.1.29 to check tags
         run: |
-          ./terratag \
+          curl -LO curl -LO https://github.com/env0/terratag/releases/download/v0.1.29/terratag_0.1.29_linux_amd64.tar.gz
+          tar -xzf terratag_0.1.29_linux_amd64.tar.gz
+          chmod +x terratag
+          sudo mv terratag /usr/local/bin/
+          terratag --version
+          terratag \
             --directory . \
             -tags='{"environment":"${{ matrix.environment }}","owner":"devops","project":"multi-env-demo"}'
 
