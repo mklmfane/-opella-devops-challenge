@@ -74,7 +74,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.10.3  # ✅ Or latest stable version
+          terraform_version: 1.12.2  # ✅ Or latest stable version
 
       - name: Run TFLint
         uses: terraform-linters/setup-tflint@v4
@@ -106,26 +106,20 @@ jobs:
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
         run: |
-          echo "📦 Converting Terraform binary plan to JSON..."
+
+          echo "📦 Converting Terraform plan to JSON…"
           terraform show -no-color -json tfplan.binary > .terraform-plan.json
 
-          # Use subshell to separate stderr and check command status
-          if terraform show -no-color -json tfplan.binary > .terraform-plan.json 2>show_err.log; then
-            echo "🧪 Validating JSON output..."
-            if jq . .terraform-plan.json > formatted.json 2>/dev/null; then
-              echo "✅ JSON is valid. First 20 lines:"
-              head -n 20 formatted.json
-              mv formatted.json .terraform-plan.json
-            else
-              echo "❌ Invalid JSON content:"
-              head -n 20 .terraform-plan.json
-              exit 1
-            fi
-          else
-            echo "❌ terraform show command failed:"
-            cat show_err.log
+          echo "🧪 Validating JSON structure…"
+          if ! jq . .terraform-plan.json > formatted.json; then
+            echo "❌ Invalid JSON detected:"
+            head -n 20 .terraform-plan.json
             exit 1
           fi
+
+          echo "✅ JSON is valid. Preview:"
+          head -n 20 formatted.json
+          mv formatted.json .terraform-plan.json
     
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         if: success()
