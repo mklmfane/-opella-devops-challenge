@@ -1,6 +1,7 @@
+# File: policy/deny_contributor_role.rego
 package terraform.analysis
 
-deny contains msg if {
+deny[msg] {
   some i
   rc := input.resource_changes[i]
   rc.type == "azurerm_role_assignment"
