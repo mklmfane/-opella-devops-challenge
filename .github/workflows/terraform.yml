@@ -106,20 +106,30 @@ jobs:
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
         run: |
-
-          echo "📦 Converting Terraform plan to JSON…"
+          echo "📦 Converting Terraform plan to JSON..."
           terraform show -no-color -json tfplan.binary > .terraform-plan.json
 
-          echo "🧪 Validating JSON structure…"
-          if ! jq . .terraform-plan.json > formatted.json; then
-            echo "❌ Invalid JSON detected:"
-            head -n 20 .terraform-plan.json
-            exit 1
+          if ! command -v python3 &> /dev/null; then
+            echo "⚠️ Python 3 not found. Installing..."
+            sudo apt-get update
+            sudo apt-get install -y python3
+          else
+            echo "✅ Python 3 is already available: $(python3 --version)"
           fi
 
-          echo "✅ JSON is valid. Preview:"
-          head -n 20 formatted.json
-          mv formatted.json .terraform-plan.json
+          python3 --version || (echo "❌ Python 3 not found!" && exit 1)
+
+          echo "🐍 Validating JSON using Python..."
+          if python3 -m json.tool .terraform-plan.json > formatted.json 2>/dev/null; then
+            echo "✅ Valid JSON file. Preview:"
+            head -n 20 formatted.json
+            mv formatted.json .terraform-plan.json
+          else
+            echo "❌ Invalid JSON detected!"
+            echo "🔍 Raw content from .terraform-plan.json:"
+            head -n 20 .terraform-plan.json
+            exit 1
+          fi  
     
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         if: success()
