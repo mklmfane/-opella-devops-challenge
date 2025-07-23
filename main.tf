@@ -2,8 +2,7 @@ locals {
   environment          = var.workflow
   resource_group_name  = "${local.environment}-rg"
   vnet_name            = "${var.vnet_name}-${local.environment}-vnet"
-  storage_account_name = "${substr(replace("${local.environment}storage${replace(uuid(), "-", "")}", "-", ""), 0, 24)}"
-
+  
   tags = merge(
     var.tags,
     {
@@ -34,7 +33,7 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 
   min_tls_version          = "TLS1_2"  # ✅ Fix: secure TLS version
-  
+
   tags                     = local.tags ## tags are managed by terratag through the pipeline
 }
 
