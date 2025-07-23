@@ -107,7 +107,11 @@ jobs:
         if: steps.terraform_plan.outcome == 'success'
         run: |
           echo "📦 Converting Terraform plan to JSON..."
-          terraform show -no-color -json tfplan.binary > .terraform-plan.json
+
+          TERRAFORM_BIN=$(which terraform)
+          echo "Using terraform binary at: $TERRAFORM_BIN"
+
+          "$TERRAFORM_BIN" show -no-color -json tfplan.binary > .terraform-plan.json
 
           if [ ! -s .terraform-plan.json ]; then
             echo "❌ JSON file is empty. Likely plan failed silently."
@@ -115,7 +119,6 @@ jobs:
           fi 
 
           echo "🐍 Validating JSON using Python..."
-
           if python3 -m json.tool .terraform-plan.json > formatted.json 2>/dev/null; then
             echo "✅ Valid JSON file. Preview:"
             head -n 20 formatted.json
@@ -125,9 +128,8 @@ jobs:
             echo "🔍 Raw content from .terraform-plan.json:"
             head -n 20 .terraform-plan.json
             exit 1
-          fi  
-
-          
+          fi
+    
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         if: success()
         run: |
