@@ -109,16 +109,21 @@ jobs:
           echo "📦 Converting Terraform binary plan to JSON..."
           terraform show -no-color -json tfplan.binary > .terraform-plan.json
 
-          echo "🧪 Validating and formatting JSON..."
-          if jq . .terraform-plan.json > formatted.json 2>/dev/null; then
-            echo "✅ Valid JSON file. Formatted preview (first 20 lines):"
-            head -n 20 formatted.json
-            mv formatted.json .terraform-plan.json
+          # Use subshell to separate stderr and check command status
+          if terraform show -no-color -json tfplan.binary > .terraform-plan.json 2>show_err.log; then
+            echo "🧪 Validating JSON output..."
+            if jq . .terraform-plan.json > formatted.json 2>/dev/null; then
+              echo "✅ JSON is valid. First 20 lines:"
+              head -n 20 formatted.json
+              mv formatted.json .terraform-plan.json
+            else
+              echo "❌ Invalid JSON content:"
+              head -n 20 .terraform-plan.json
+              exit 1
+            fi
           else
-            echo "❌ Could not parse .terraform-plan.json as valid JSON"
-            echo "🔍 Showing raw output from .terraform-plan.json:"
-            cat .terraform-plan.json
-            rm -f formatted.json
+            echo "❌ terraform show command failed:"
+            cat show_err.log
             exit 1
           fi
     
