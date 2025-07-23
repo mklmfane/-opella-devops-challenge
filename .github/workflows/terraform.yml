@@ -100,6 +100,15 @@ jobs:
         id: terraform_plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -out=tfplan.binary
 
+
+      - name: Save Plan as JSON
+        id: save_plan_json
+        if: steps.terraform_plan.outcome == 'success'
+        run: |
+          terraform show -json tfplan.binary > .terraform-plan.json      
+          echo "===== Plan JSON Preview ====="
+          head -n 20 .terraform-plan.json || echo "File not found!"
+
       - name: Check tags using Terratag v0.7.2
         run: |
           echo "📥 Downloading Terratag v0.7.2..."
@@ -119,11 +128,6 @@ jobs:
 
           terratag -dir . \
             -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
-
-      - name: Save Plan as JSON
-        id: save_plan_json
-        if: steps.terraform_plan.outcome == 'success'
-        run: terraform show -json tfplan.binary > .terraform-plan.json      
 
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         id: policy_confest
