@@ -57,13 +57,16 @@ variable "size_vm" {
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
-  default     = {}
+  default     = {
+    project     = "multi-env-demo"
+    owner       = "devops"
+  }
 }
 
 variable "linux_source_image_reference" {
   description = "Map of source image reference for the virtual machine"
   type = map(string)
-  
+
   default = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"

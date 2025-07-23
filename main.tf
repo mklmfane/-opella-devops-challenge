@@ -1,14 +1,15 @@
 locals {
   environment          = var.workflow
   resource_group_name  = "${local.environment}-rg"
-  vnet_name            = "${local.environment}-vnet"
+  vnet_name            = "${var.vnet_name}-${local.environment}-vnet"
   storage_account_name = "${substr(replace("${local.environment}storage${replace(uuid(), "-", "")}", "-", ""), 0, 24)}"
 
-  tags = {
-    environment = local.environment
-    project     = "multi-env-demo"
-    owner       = "devops"
-  }
+  tags = merge(
+    var.tags,
+    {
+      environment = local.environment
+    }
+  )
 }
 
 resource "random_string" "suffix" {
@@ -21,6 +22,8 @@ resource "random_string" "suffix" {
 resource "azurerm_resource_group" "rg" {
   name     = local.resource_group_name
   location = var.location
+
+  tags = local.tags
 }
 
 resource "azurerm_storage_account" "sa" {
@@ -31,7 +34,8 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 
   min_tls_version          = "TLS1_2"  # ✅ Fix: secure TLS version
-  #tags                     = local.tags ## tags are managed by terratag through the pipeline
+  
+  tags                     = local.tags ## tags are managed by terratag through the pipeline
 }
 
 module "vnet" {
@@ -42,7 +46,7 @@ module "vnet" {
   address_space       = var.address_space
   subnets             = var.subnets
 
-  #tags                = local.tags ## tags are managed by terratag  through the pipeline
+  tags                = local.tags ## tags are managed by terratag  through the pipeline
 }
 
 
@@ -70,6 +74,6 @@ module "vm" {
   linux_source_image_reference = var.linux_source_image_reference
   windows_image_reference = var.windows_image_reference
 
-  #tags                   = local.tags ## tags are managed by terratag
+  tags                   = local.tags ## tags are managed by terratag
 }
 
