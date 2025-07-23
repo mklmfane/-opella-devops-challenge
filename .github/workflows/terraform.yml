@@ -100,7 +100,6 @@ jobs:
         id: terraform_plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -out=tfplan.binary
 
-
       - name: Save Plan as JSON
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
@@ -139,7 +138,7 @@ jobs:
           conftest test -p policy .terraform-plan.json    
 
       - name: Terraform Apply
-        if: steps.policy_confest.outputs.outcome == 'ok'
+        if: steps.policy_confest.outcome == 'ok'
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
 
       - name: Terraform Destroy
