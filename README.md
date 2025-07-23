@@ -85,9 +85,11 @@ Instead of creating folders, I preferred creating terraform workflows in github 
     In your case, you run multi-environment deployment via GitHub Actions workflows, each deploying into its own workspace (dev, test, prod), with environment set via:
 
 hcl
+```
 locals {
   environment = var.workflow
 }
+```
 
   - Keeps it flexible, avoids extra manual setup.
     Resource Groups can be used in most of the cases for the environments such as development, testing, and staging.
@@ -98,6 +100,7 @@ locals {
   
   - Name and label resources to make the environment and region clear.
     This can be performed by using variable 
+    ```
     variable "tags" {
       description = "Tags"
       type        = map(string)
@@ -113,19 +116,22 @@ locals {
         project     = "multi-env-demo"
      }
     }
-
+    ```
 
     This is the default value defined in terrafrom.tfvars
+    ```
     tags = {
       environment = "dev"
       project     = "opella"
     }
+    ```
  
 
   - Avoid repeating values—how can you make this flexible?
     That is why I decided to use local variable
     
   hcl
+  ```
     locals {
       environment = var.workflow
   
@@ -137,7 +143,8 @@ locals {
         environment = local.environment
         project     = "multi-env-demo"
       }
-    }  
+    }
+  ```  
 
   - How might you label resources for better tracking? How would you enforce this?
 
@@ -150,14 +157,18 @@ locals {
     - securtity compliance for security audit like PCI DSS
     
     How to enforce?
-    There are two ways of enfocing tags for better tracking
+    
+    Officlally, there are two ways of enfocing tags for better tracking:
      - Use one of choice fora applying  Terraform policies like Open policy agent or Terrafrom Sentinel.
-     - Use Azure Policy to stop deployment in cae the tags are not applied
+     - Use Azure Policy to stop deployment in case the tags are not applied
+    I used terratag in this example for convenience reasons to report what tags can be enforced to be applied. https://github.com/env0/terratag 
+     
 
   
   - What outputs might be useful and why?
     Terraform used the selected providers to generate the following execution
     plan. Resource actions are indicated with the following symbols:
+    ```
     + create
 
     Terraform will perform the following actions:
@@ -231,11 +242,14 @@ Changes to Outputs:
   + vnet_id    = (known after apply)
 
 ─────────────────────────────────────────────────────────────────────────────
-
-Note: You didn't use the -out option to save this plan, so Terraform can't
-guarantee to take exactly these actions if you run "terraform apply" now.
   - Bonus points if you build a GitHub pipeline and explain the release lifecycle.
+    There are two jobs
+    1. build job used for checkign out teh code and login to Azure subscription
+    2. Deploy used for checking and applying terraform code
+       I used the following tools for checkign the quality of the terraform code 
+       - terratag for checking the status of applying tags , 
+       - tflint to write recomemnded code 
+       - tfsec for writign secure code
 
----
-
+---     
 Good luck—we’re excited to see your work!

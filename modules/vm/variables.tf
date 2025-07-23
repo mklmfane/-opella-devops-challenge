@@ -13,11 +13,6 @@ variable "virtual_machine_name" {
   type = string
 }
 
-variable "vnet_name" {
-  description = "Name of the virtual network"
-  type        = string
-}
-
 variable "size_vm" {
   description = "Size of the virtual machine"
   type = string
@@ -43,7 +38,7 @@ variable "username" {
 variable "linux_source_image_reference" {
   description = "source image name references"
   type        = map(string)
-  
+
   default     = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
