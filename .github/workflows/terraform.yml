@@ -106,29 +106,16 @@ jobs:
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
         run: |
+          sudo apt install -y jq
           terraform show -no-color -json tfplan.binary > .terraform-plan.json  
           
-          # Fail if file is empty or invalid
-          if [ ! -f .terraform-plan.json ]; then
-            echo "❌ .terraform-plan.json does not exist."
+          if ! jq -e . >/dev/null 2>&1 < .terraform-plan.json; then
+            echo "Could not parse JSON file"
             exit 1
+          else
+            echo "Valid JSON file. Contents:"
+            cat .terraform-plan.json
           fi
-
-          if [ ! -s .terraform-plan.json ]; then
-            echo "❌ .terraform-plan.json is empty."
-            exit 1
-          fi
-
-          #if ! jq empty .terraform-plan.json 2>/dev/null; then
-          #  echo "❌ .terraform-plan.json is not valid JSON:"
-          #  cat .terraform-plan.json
-          #  exit 1
-          #fi  
-          
-          echo "===== Plan JSON Preview ====="
-          head -n 5 .terraform-plan.json || echo "file not found"
-          echo "🧪 File type:"
-          file .terraform-plan.json  
 
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         if: success()
