@@ -126,7 +126,8 @@ jobs:
             head -n 20 .terraform-plan.json
             exit 1
           fi  
-    
+
+          
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
         if: success()
         run: |
