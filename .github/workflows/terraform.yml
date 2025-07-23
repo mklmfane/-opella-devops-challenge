@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GH_PAT }}  # Use PAT for push permissions
+          token: ${{ secrets.GH_PAT }}  # ✅ Correct input name is 'token'
 
       - name: Render Terraform Docs and Commit
         uses: terraform-docs/gh-actions@v1.4.1
@@ -51,7 +51,8 @@ jobs:
           git-push-user-name: "github-actions[bot]"
           git-push-user-email: "41898282+github-actions[bot]@users.noreply.github.com"
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Enable pushing to the repo
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # ✅ Required for commit access
+
 
   deploy:
     needs: build
