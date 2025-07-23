@@ -35,13 +35,13 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR branch
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GH_PAT }}  # ✅ Correct input name is 'token'
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GH_PAT }}  # Use a PAT with push permission
 
-      - name: Render Terraform Docs and Commit
+      - name: Generate Terraform Docs and Commit
         uses: terraform-docs/gh-actions@v1.4.1
         with:
           working-dir: .
@@ -51,7 +51,7 @@ jobs:
           git-push-user-name: "github-actions[bot]"
           git-push-user-email: "41898282+github-actions[bot]@users.noreply.github.com"
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # ✅ Required for commit access
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Required to allow commits
 
 
   deploy:
