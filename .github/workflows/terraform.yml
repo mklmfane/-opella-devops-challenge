@@ -99,12 +99,6 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}"
 
-      - name: Preview Terraform Docs (no write)
-        run: |
-          curl -Lo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v0.16.0/terraform-docs-v0.16.0-linux-amd64
-          chmod +x terraform-docs
-          ./terraform-docs markdown table .
-
       - name: Check tags using Terratag v0.7.2
         run: |
           echo "📥 Downloading Terratag v0.7.2..."
