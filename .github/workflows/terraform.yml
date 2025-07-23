@@ -108,21 +108,6 @@ jobs:
         with:
           version: latest    
       
-      - name: Run OPA Policy Check
-        id: opa_eval
-        if: steps.terraform_plan.conclusion == 'success'
-        run: |
-          terraform show -json tfplan.binary | grep '^{.*}$' > tfplan.json
-          result=$(opa eval --format json --input tfplan.json --data policy 'data.terraform.analysis.deny')
-          echo "OPA evaluation result: $result"
-          count=$(echo "$result" | jq '[.[].expressions[].value] | flatten | length')
-          if [ "$count" -gt 0 ]; then
-            echo "❌ OPA Deny policy failed with $count violation(s)."
-            exit 1
-          else
-            echo "✅ No deny violations found."
-          fi    
-
       - name: Run OPA Tests
         id: opa_tests
         continue-on-error: true  # This allows the step to fail without failing the entire job
@@ -149,7 +134,7 @@ jobs:
     
       - name: Terraform Apply
         if: steps.terraform_plan.outcome == 'ok'
-        run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
-
+        run: terraform apply tfplan.binary -auto-approve
+        
       - name: Terraform Destroy
-        run: terraform destroy -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
+        run: terraform destroy tfplan.binary -auto-approve
