@@ -107,6 +107,22 @@ jobs:
         uses: open-policy-agent/setup-opa@v2
         with:
           version: latest    
+
+      - name: Run OPA Policy Check
+        id: opa_eval
+        if: steps.terraform_plan.conclusion == 'success'
+        run: |
+          terraform show -json tfplan.binary > tfplan.json
+          result=$(opa eval --format json --input tfplan.json --data policy 'data.terraform.analysis.deny')
+          echo "OPA evaluation result: $result"
+
+          count=$(echo "$result" | jq '.result[].expressions[].value | length')
+          if [ "$count" -gt 0 ]; then
+            echo "❌ OPA Deny policy failed with $count violation(s)."
+            exit 1
+          else
+            echo "✅ No deny violations found."
+          fi
       
       - name: Run OPA Tests
         id: opa_tests
