@@ -132,9 +132,10 @@ jobs:
           terratag -dir . \
             -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
     
+            
       - name: Terraform Apply
         if: steps.terraform_plan.outcome == 'ok'
-        run: terraform apply tfplan.binary -auto-approve
+        run: terraform apply tfplan.binary
         
       - name: Terraform Destroy
         run: terraform destroy -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -auto-approve
