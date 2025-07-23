@@ -105,8 +105,21 @@ jobs:
         if: steps.terraform_plan.outcome == 'success'
         run: |
           terraform show -json tfplan.binary > .terraform-plan.json      
+
+      - name: Debug JSON file content
+        run: |
           echo "===== Plan JSON Preview ====="
-          head -n 20 .terraform-plan.json || echo "File not found!"
+          head -n 5 .terraform-plan.json || echo "file not found"
+          echo "🧪 File type:"
+          file .terraform-plan.json  
+
+      - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
+        if: success()
+        run: |
+          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.62.0/conftest_0.62.0_Linux_x86_64.tar.gz | tar xz
+          chmod +x conftest
+          sudo mv conftest /usr/local/bin/
+          conftest test -p policy .terraform-plan.json    
 
       - name: Check tags using Terratag v0.7.2
         run: |
@@ -122,20 +135,11 @@ jobs:
           
           echo "✅ Terratag version:"
           terratag --version
-          
+  
           echo "🏷️ Check tagging of all the Terraform files with Terratag..."
-
           terratag -dir . \
             -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
-
-      - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
-        id: policy_confest
-        run: |
-          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.62.0/conftest_0.62.0_Linux_x86_64.tar.gz | tar xz
-          chmod +x conftest
-          sudo mv conftest /usr/local/bin/
-          conftest test -p policy .terraform-plan.json    
-
+    
       - name: Terraform Apply
         if: steps.policy_confest.outcome == 'ok'
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
