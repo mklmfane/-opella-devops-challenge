@@ -61,7 +61,6 @@ module "vm" {
   
 
   # Add missing required arguments
-  #vnet_name   = module.vnet.vnet_name
   subnet_id = module.vnet.subnet_ids["subnet-1"]
   environment = local.environment
 
