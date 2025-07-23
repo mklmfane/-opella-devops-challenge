@@ -38,8 +38,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
-          token: ${{ secrets.GH_PAT }}  # ✅ Required for push access
+          token: ${{ secrets.GH_PAT }}  # ✅ Must be provided explicitly
+          fetch-depth: 0  # Optional: fetch full history if needed
 
       - name: Generate Terraform Docs and Commit
         uses: terraform-docs/gh-actions@v1.4.1
