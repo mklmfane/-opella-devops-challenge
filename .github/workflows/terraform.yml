@@ -109,17 +109,13 @@ jobs:
           echo "📦 Converting Terraform plan to JSON..."
           terraform show -no-color -json tfplan.binary > .terraform-plan.json
 
-          if ! command -v python3 &> /dev/null; then
-            echo "⚠️ Python 3 not found. Installing..."
-            sudo apt-get update
-            sudo apt-get install -y python3
-          else
-            echo "✅ Python 3 is already available: $(python3 --version)"
-          fi
-
-          python3 --version || (echo "❌ Python 3 not found!" && exit 1)
+          if [ ! -s .terraform-plan.json ]; then
+            echo "❌ JSON file is empty. Likely plan failed silently."
+            exit 1
+          fi 
 
           echo "🐍 Validating JSON using Python..."
+
           if python3 -m json.tool .terraform-plan.json > formatted.json 2>/dev/null; then
             echo "✅ Valid JSON file. Preview:"
             head -n 20 formatted.json
