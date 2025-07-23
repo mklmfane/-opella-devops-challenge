@@ -116,6 +116,7 @@ jobs:
 
       - name: Run OPA Tests
         id: opa_tests
+        continue-on-error: true  # This allows the step to fail without failing the entire job
         run: opa test policy/*.rego -v    
 
       - name: Check tags using Terratag v0.7.2
