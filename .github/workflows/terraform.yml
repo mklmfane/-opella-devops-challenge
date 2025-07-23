@@ -74,7 +74,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.12.2  # ✅ Or latest stable version
+          terraform_version: 1.10.3  # ✅ Or latest stable version
 
       - name: Run TFLint
         uses: terraform-linters/setup-tflint@v4
