@@ -137,4 +137,4 @@ jobs:
         run: terraform apply tfplan.binary -auto-approve
         
       - name: Terraform Destroy
-        run: terraform destroy tfplan.binary -auto-approve
+        run: terraform destroy -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -auto-approve
