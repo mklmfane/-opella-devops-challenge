@@ -108,6 +108,12 @@ jobs:
         with:
           version: latest    
       
+      - name: Run OPA Policy Check
+        if: steps.terraform_plan.outcome == 'ok'
+        run: |
+          terraform show -json tfplan.binary | grep '^{.*}$' > tfplan.json
+          opa eval --format pretty --input tfplan.json --data policy 'data.terraform.analysis.deny'    
+
       - name: Run OPA Tests
         id: opa_tests
         run: opa test policy/*.rego -v    
