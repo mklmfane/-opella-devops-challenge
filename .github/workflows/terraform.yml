@@ -75,6 +75,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.12.2  # ✅ Or latest stable version
+          terraform_wrapper: false
 
       - name: Run TFLint
         uses: terraform-linters/setup-tflint@v4
@@ -102,41 +103,13 @@ jobs:
         id: terraform_plan
         run: terraform plan -input=false -no-color -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -out=tfplan.binary
 
-      - name: Save Plan as JSON
-        id: save_plan_json
-        if: steps.terraform_plan.outcome == 'success'
-        run: |
-          echo "📦 Converting Terraform plan to JSON..."
-
-          TERRAFORM_BIN=$(which terraform)
-          echo "Using terraform binary at: $TERRAFORM_BIN"
-
-          "$TERRAFORM_BIN" show -no-color -json tfplan.binary > .terraform-plan.json
-
-          if [ ! -s .terraform-plan.json ]; then
-            echo "❌ JSON file is empty. Likely plan failed silently."
-            exit 1
-          fi 
-
-          echo "🐍 Validating JSON using Python..."
-          if python3 -m json.tool .terraform-plan.json > formatted.json 2>/dev/null; then
-            echo "✅ Valid JSON file. Preview:"
-            head -n 20 formatted.json
-            mv formatted.json .terraform-plan.json
-          else
-            echo "❌ Invalid JSON detected!"
-            echo "🔍 Raw content from .terraform-plan.json:"
-            head -n 20 .terraform-plan.json
-            exit 1
-          fi
-    
-      - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
-        if: success()
-        run: |
-          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.62.0/conftest_0.62.0_Linux_x86_64.tar.gz | tar xz
-          chmod +x conftest
-          sudo mv conftest /usr/local/bin/
-          conftest test -p policy .terraform-plan.json    
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest    
+      
+      - name: Run OPA Tests
+        run: opa test policy/*.rego -v    
 
       - name: Check tags using Terratag v0.7.2
         run: |
