@@ -100,7 +100,7 @@ jobs:
 
       - name: Terraform Plan
         id: terraform_plan
-        run: terraform plan -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -out=tfplan.binary
+        run: terraform plan -input=false -no-color -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -out=tfplan.binary
 
       - name: Save Plan as JSON
         id: save_plan_json
