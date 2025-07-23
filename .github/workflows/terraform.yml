@@ -29,6 +29,21 @@ jobs:
           az account show
           az group list
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+
+    - name: Render terraform docs inside the README.md and push changes back to PR branch
+      uses: terraform-docs/gh-actions@v1.4.1
+      with:
+        working-dir: .
+        output-file: README-terraform-resources.md
+        output-method: inject
+        git-push: "true"
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -65,6 +80,15 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 👉 Terraform Docs step
+      - name: Generate Terraform Docs
+        uses: terraform-docs/gh-actions@v1.4.1
+        with:
+          working-dir: .
+          output-file: README-Terraform.md
+          output-method: replace
+          config-file: .terraform-docs.yml
 
       - name: Terraform Init
         run: terraform init

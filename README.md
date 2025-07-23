@@ -243,13 +243,22 @@ Changes to Outputs:
 
 ─────────────────────────────────────────────────────────────────────────────
   - Bonus points if you build a GitHub pipeline and explain the release lifecycle.
-    There are two jobs
-    1. build job used for checkign out teh code and login to Azure subscription
-    2. Deploy used for checking and applying terraform code
-       I used the following tools for checkign the quality of the terraform code 
-       - terratag for checking the status of applying tags , 
-       - tflint to write recomemnded code 
-       - tfsec for writign secure code
+
+    There are two jobs used in this pipeline
+    1. "Build" job used for 
+       - Checking out the code (copy teh terrafrom code from teh repository into the the build agent machine)
+       - Login to Azure portal by using OIDC connection
+       
+    and login to Azure subscription
+    2. "Deploy" job used for checking and applying terraform code
+       - Setup terraform.
+       - Login to azure based on  using OIDC connection.
+       - I used the following tools for checking the quality of the terraform code. 
+        - terratag for checking the status of applying tags , 
+        - tflint to write recomemnded code.
+        - tfsec for writign secure code.
+       - Setup dedicated workflow for each environment like dev,text and prod
+       - Running terraform in parallel for each environment. 
 
 ---     
 Good luck—we’re excited to see your work!
