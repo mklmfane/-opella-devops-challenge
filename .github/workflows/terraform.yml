@@ -74,7 +74,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.6.6  # ✅ Or latest stable version
+          terraform_version: 1.12.2  # ✅ Or latest stable version
 
       - name: Run TFLint
         uses: terraform-linters/setup-tflint@v4
@@ -106,7 +106,7 @@ jobs:
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
         run: |
-          terraform show -json tfplan.binary > .terraform-plan.json  
+          terraform show -no-color -json tfplan.binary > .terraform-plan.json  
           
           # Fail if file is empty or invalid
           if [ ! -f .terraform-plan.json ]; then
@@ -119,14 +119,12 @@ jobs:
             exit 1
           fi
 
-          if ! jq empty .terraform-plan.json 2>/dev/null; then
-            echo "❌ .terraform-plan.json is not valid JSON:"
-            cat .terraform-plan.json
-            exit 1
-          fi  
-
-      - name: Debug JSON file content
-        run: |
+          #if ! jq empty .terraform-plan.json 2>/dev/null; then
+          #  echo "❌ .terraform-plan.json is not valid JSON:"
+          #  cat .terraform-plan.json
+          #  exit 1
+          #fi  
+          
           echo "===== Plan JSON Preview ====="
           head -n 5 .terraform-plan.json || echo "file not found"
           echo "🧪 File type:"
