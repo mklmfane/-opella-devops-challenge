@@ -104,7 +104,24 @@ jobs:
         id: save_plan_json
         if: steps.terraform_plan.outcome == 'success'
         run: |
-          terraform show -json tfplan.binary > .terraform-plan.json      
+          terraform show -json tfplan.binary > .terraform-plan.json  
+          
+          # Fail if file is empty or invalid
+          if [ ! -f .terraform-plan.json ]; then
+            echo "❌ .terraform-plan.json does not exist."
+            exit 1
+          fi
+
+          if [ ! -s .terraform-plan.json ]; then
+            echo "❌ .terraform-plan.json is empty."
+            exit 1
+          fi
+
+          if ! jq empty .terraform-plan.json 2>/dev/null; then
+            echo "❌ .terraform-plan.json is not valid JSON:"
+            cat .terraform-plan.json
+            exit 1
+          fi  
 
       - name: Debug JSON file content
         run: |
