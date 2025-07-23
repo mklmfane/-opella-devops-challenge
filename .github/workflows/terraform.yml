@@ -53,7 +53,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Required to allow commits
 
-
   deploy:
     needs: [build, docs]
     runs-on: ubuntu-latest
