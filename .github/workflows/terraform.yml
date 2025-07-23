@@ -35,18 +35,23 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        ref: ${{ github.event.pull_request.head.ref }}
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GH_PAT }}  # Use PAT for push permissions
 
-    - name: Render terraform docs inside the README.md and push changes back to PR branch
-      uses: terraform-docs/gh-actions@v1.4.1
-      with:
-        working-dir: .
-        output-file: README-terraform-resources.md
-        output-method: inject
-        git-push: "true"
+      - name: Render Terraform Docs and Commit
+        uses: terraform-docs/gh-actions@v1.4.1
+        with:
+          working-dir: .
+          output-file: README-terraform-resources.md
+          output-method: inject
+          git-push: "true"
+          git-push-user-name: "github-actions[bot]"
+          git-push-user-email: "41898282+github-actions[bot]@users.noreply.github.com"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Enable pushing to the repo
 
   deploy:
     needs: build
