@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 permissions:
   id-token: write    # REQUIRED for OIDC authentication
@@ -34,6 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.event.pull_request.head.ref }}
 
     - name: Render terraform docs inside the README.md and push changes back to PR branch
