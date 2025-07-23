@@ -119,7 +119,21 @@ jobs:
           terratag -dir . \
             -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
 
+      - name: Save Plan as JSON
+        id: save_plan_json
+        run: terraform show -json tfplan.binary > .terraform-plan.json      
+      
+      - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
+        id: policy_confest
+        if: steps.save_plan_json.outputs.status == 'ok'
+        run: |
+          curl -sL https://github.com/open-policy-agent/conftest/releases/download/v0.62.0/conftest_0.62.0_Linux_x86_64.tar.gz | tar xz
+          chmod +x conftest
+          sudo mv conftest /usr/local/bin/
+          conftest test -p policy .terraform-plan.json    
+
       - name: Terraform Apply
+        if: steps.policy_confest.outputs.status == 'ok'
         run: terraform apply -var="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}" -var="workflow=${{ matrix.environment }}" -var="username=${{ secrets.VM_USERNAME }}" -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" --auto-approve
 
       - name: Terraform Destroy
