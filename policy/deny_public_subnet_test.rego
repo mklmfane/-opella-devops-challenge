@@ -1,11 +1,9 @@
-# File: policy/deny_public_ingress_test.rego
-package terraform.analysis
+package terraform.analysis.test
 
 import data.terraform.analysis
 
-test_deny_public_ingress_violation {
-  some i
-  input := {
+test_deny_public_subnet_violation if {
+  test_input := {
     "resource_changes": [{
       "type": "azurerm_network_security_rule",
       "address": "module.vnet.azurerm_network_security_rule.allow_all",
@@ -17,6 +15,7 @@ test_deny_public_ingress_violation {
     }]
   }
 
-  msg := terraform.analysis.deny[i]
+  some msg
+  analysis.deny[msg] with input as test_input
   msg == "❌ Public ingress from 0.0.0.0/0 detected at: module.vnet.azurerm_network_security_rule.allow_all"
 }
