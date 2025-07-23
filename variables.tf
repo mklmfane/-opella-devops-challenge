@@ -60,13 +60,47 @@ variable "tags" {
   default     = {}
 }
 
-variable "source_image_reference" {
+variable "linux_source_image_reference" {
   description = "Map of source image reference for the virtual machine"
   type = map(string)
+  
   default = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
     sku       = "22_04-lts"
     version   = "latest"
+  }
+}
+
+variable "windows_image_reference" {
+  description = "Windows image reference"
+  type        = map(string)
+
+  default     = {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-datacenter-azure-edition"
+    version   = "latest"
+  }
+}
+
+variable "os_type" {
+  description = "Operating system type for the VM. Allowed values: linux or windows"
+  type        = string
+  default     = "linux"
+  validation {
+    condition     = contains(["linux", "windows"], var.os_type)
+    error_message = "os_type must be 'linux' or 'windows'"
+  }
+}
+
+variable "admin_password" {
+  description = "Admin password for Windows VM (required only if os_type is windows)"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.os_type == "windows" ? var.admin_password != null && length(var.admin_password) > 0 : true
+    error_message = "admin_password must be set and non-empty when os_type is 'windows'."
   }
 }

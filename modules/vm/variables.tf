@@ -39,14 +39,11 @@ variable "username" {
   type = string  
 }
 
-variable "ssh_public_key" {
-  description = "ssh public key"
-  type = string  
-}
 
-variable "source_image_reference" {
+variable "linux_source_image_reference" {
   description = "source image name references"
   type        = map(string)
+  
   default     = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-jammy"
@@ -54,6 +51,41 @@ variable "source_image_reference" {
     version   = "latest"
   }
 }
+
+variable "windows_image_reference" {
+  description = "Windows image reference"
+  type        = map(string)
+
+  default     = {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2022-datacenter-azure-edition"
+    version   = "latest"
+  }
+}
+
+
+variable "os_type" {
+  description = "Operating system type for the VM. Allowed values: linux or windows"
+  type        = string
+  default     = "linux"
+  validation {
+    condition     = contains(["linux", "windows"], var.os_type)
+    error_message = "os_type must be 'linux' or 'windows'"
+  }
+}
+
+variable "admin_password" {
+  description = "Admin password for Windows VM"
+  type        = string
+  default     = null
+}
+
+variable "ssh_public_key" {
+  description = "ssh public key only for linux VMs"
+  type = string  
+}
+
 
 variable "tags" {
   description = "Tags to apply to resources"

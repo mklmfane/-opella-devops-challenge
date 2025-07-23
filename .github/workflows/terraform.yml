@@ -50,6 +50,17 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      - name: Run TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run TFLint on Terraform code
+        run: tflint --recursive
+
       - name: Run tfsec (Terraform Security Scanner)
         uses: aquasecurity/tfsec-action@v1.0.3
         with:

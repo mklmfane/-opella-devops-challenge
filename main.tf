@@ -19,7 +19,6 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  #count    = data.azurerm_resource_group.existing_rg.id != "" ? 0 : 1
   name     = local.resource_group_name
   location = var.location
 }
@@ -32,7 +31,7 @@ resource "azurerm_storage_account" "sa" {
   account_replication_type = "LRS"
 
   min_tls_version          = "TLS1_2"  # ✅ Fix: secure TLS version
-  #tags                     = local.tags
+  #tags                     = local.tags ## tags are managed by terratag through the pipeline
 }
 
 module "vnet" {
@@ -42,7 +41,8 @@ module "vnet" {
   vnet_name           = local.vnet_name
   address_space       = var.address_space
   subnets             = var.subnets
-  #tags                = local.tags
+
+  #tags                = local.tags ## tags are managed by terratag  through the pipeline
 }
 
 
@@ -55,13 +55,21 @@ module "vm" {
   size_vm                = var.size_vm
   username               = var.username
   ssh_public_key         = var.ssh_public_key
-  source_image_reference = var.source_image_reference
+  
 
   # Add missing required arguments
   vnet_name   = module.vnet.vnet_name
   subnet_id = module.vnet.subnet_ids["subnet-1"]
   environment = local.environment
 
-  #tags                   = local.tags
+  os_type               = var.os_type
+  admin_password        = var.admin_password
+
+
+  # New: pass OS-specific image references
+  linux_source_image_reference = var.linux_source_image_reference
+  windows_image_reference = var.windows_image_reference
+
+  #tags                   = local.tags ## tags are managed by terratag
 }
 
