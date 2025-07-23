@@ -132,9 +132,9 @@ jobs:
           terratag -dir . \
             -tags="{\"environment\":\"${{ matrix.environment }}\", \"project\":\"multi-env-demo\", \"owner\":\"devops\"}" -type terraform
     
-            
+
       - name: Terraform Apply
-        if: steps.terraform_plan.outcome == 'ok'
+        if: steps.terraform_plan.conclusion == 'success'
         run: terraform apply tfplan.binary
         
       - name: Terraform Destroy
