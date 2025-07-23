@@ -122,7 +122,7 @@ jobs:
 
       - name: Save Plan as JSON
         id: save_plan_json
-        continue-on-error: true
+        if: steps.terraform_plan.outcome == 'success'
         run: terraform show -json tfplan.binary > .terraform-plan.json      
 
       - name: Follow provisioning policies in terraform for Azure VNET and Azure VM
