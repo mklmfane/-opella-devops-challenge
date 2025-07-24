@@ -27,6 +27,14 @@ variable "subnets" {
   }))
 }
 
+variable "prefix_vnet" {
+  description = "Prefix for VNEt name"
+  type = string
+
+  default = "vnet-default"
+}
+
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

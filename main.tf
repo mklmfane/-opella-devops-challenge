@@ -45,6 +45,8 @@ module "vnet" {
   address_space       = var.address_space
   subnets             = var.subnets
 
+  prefix_vnet         = var.prefix_vnet
+
   tags                = local.tags ## tags are managed by terratag  through the pipeline
 }
 

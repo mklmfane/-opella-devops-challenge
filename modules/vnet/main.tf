@@ -16,3 +16,22 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = each.value.address_prefixes
 }
 
+resource "azurerm_network_security_group" "this" {
+  name                = "${var.prefix_vnet}-nsg"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+}
+
+resource "azurerm_network_security_rule" "allow_all_inbound" {
+  name                        = "AllowAllInbound"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "0.0.0.0/0"
+  destination_address_prefix  = "*"
+  network_security_group_name = azurerm_network_security_group.this.name
+  resource_group_name         = var.resource_group_name
+}
