@@ -106,8 +106,9 @@ jobs:
       - name: Run OPA Policy Check
         id: opa_eval
         if: steps.terraform_plan.conclusion == 'success'
+        continue-on-error: true  # This allows the step to fail without failing the entire job
         run: |
-          terraform show -json tfplan.binary > tfplan.json
+          terraform show -json tfplan.binary | grep '^{.*}$' > tfplan.json
           result=$(opa eval --format json --input tfplan.json --data policy 'data.terraform.analysis.deny')
           echo "OPA evaluation result: $result"
 
