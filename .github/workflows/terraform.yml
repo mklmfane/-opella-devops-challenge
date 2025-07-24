@@ -81,7 +81,12 @@ jobs:
         uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: latest
-
+      
+      - name: Run tfsec (Terraform Security Scanner)
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+    
       - name: Initialize TFLint
         run: tflint --init
 
