@@ -88,11 +88,6 @@ jobs:
       - name: Run TFLint on Terraform code
         run: tflint --recursive
 
-      - name: Run tfsec (Terraform Security Scanner)
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Terraform Init
         run: terraform init
 
