@@ -38,6 +38,7 @@
 | <a name="input_linux_source_image_reference"></a> [linux\_source\_image\_reference](#input\_linux\_source\_image\_reference) | Map of source image reference for the virtual machine | `map(string)` | <pre>{<br/>  "offer": "0001-com-ubuntu-server-jammy",<br/>  "publisher": "Canonical",<br/>  "sku": "22_04-lts",<br/>  "version": "latest"<br/>}</pre> | no |
 | <a name="input_location"></a> [location](#input\_location) | Azure region to deploy resources in | `string` | `"westeurope"` | no |
 | <a name="input_os_type"></a> [os\_type](#input\_os\_type) | Operating system type for the VM. Allowed values: linux or windows | `string` | `"linux"` | no |
+| <a name="input_prefix_vnet"></a> [prefix\_vnet](#input\_prefix\_vnet) | Prefix of the VNET | `string` | n/a | yes |
 | <a name="input_size_vm"></a> [size\_vm](#input\_size\_vm) | The size of the virtual machine | `string` | `"Standard_B1s"` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key for VM authentication | `string` | n/a | yes |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnets for the VNet | <pre>list(object({<br/>    name             = string<br/>    address_prefixes = list(string)<br/>  }))</pre> | n/a | yes |
